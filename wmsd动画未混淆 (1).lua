@@ -333,7 +333,7 @@ local function simulateLoading()
 -- 自动生成的汉化脚本
 
 local Translations = {["Vgxmod Hub"] = "Vgxmod 🇨🇳 ",
-    ["Discord"] = "discord",
+    [""] = "",
     ["Credits"] = "脚本作者的dc",
     ["Made By: Pkgx1"] = "汉化by16(不是脚本作者)",
     ["Main"] = "主要",
@@ -363,7 +363,7 @@ local Translations = {["Vgxmod Hub"] = "Vgxmod 🇨🇳 ",
     ["Infinity Stamina"] = "无限体力",
     ["Always (SafeZone)"] = "始终安全区域",
     ["discord"] = "控制",
-    ["On Discord!"] = "对,discord",
+    ["On Discord!"] = "是的，dc",
     ["You Can Request Script"] = "你可以请求脚本",
     ["MOBILE USER"] = "手机",
     ["PC USER"] = "PC端(电脑)",
