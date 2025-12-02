@@ -370,9 +370,9 @@ local Translations = {["Vgxmod Hub"] = "Vgxmod 🇨🇳 ",
     ["Just Press The CTRL"] = "点击ctrl打开",
     ["To Close The Menu"] = "点击按钮关闭",
     ["Simply Click the Icon"] = "点击按钮关闭",
-    ["Copy"] = "复制",
+    ["Copy"] = "点击复制",
     ["To Close the Menu"] = "点击ctrl关闭",
-    [""] = "",
+    ["Discord Link"] = "discord链接",
     [""] = "",
     }
 
