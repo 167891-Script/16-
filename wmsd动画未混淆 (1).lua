@@ -372,7 +372,7 @@ local Translations = {["Vgxmod Hub"] = "Vgxmod 🇨🇳 ",
     ["Simply Click the Icon"] = "点击按钮关闭",
     ["Copy"] = "点击复制",
     ["To Close the Menu"] = "点击ctrl关闭",
-    ["Discord Link"] = "discord链接",
+    [""] = "",
     [""] = "",
     }
 
