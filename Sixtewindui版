@@ -933,8 +933,8 @@ local Tab = Window:Tab({
 Window:SelectTab(2)
 
 -- doors xk 按钮
-local Button = Tab:Button({
-    Title = "检测注入器😡😱",
+local 检测Button = Tab:Button({
+    Title = "检测注入器",
     Desc = "点击运行检测注入器",
     Locked = false,
     Callback = function()
@@ -1001,11 +1001,3 @@ local Button = Tab:Button({
         end
     end
       
-        WindUI:Notify({
-            Title = "Vgxmod 亡命速递",
-            Content = "加载成功",
-            Duration = 3,
-            Icon = "MousePointerClick",
-        })
-    end
-})
