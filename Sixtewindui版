@@ -924,95 +924,76 @@ loadstring(game:HttpGet(
     end
 })
 
--- 创建 Tab
-local Tab = Window:Tab({
-    Title = "设置",
-    Icon = "MousePointerClick",
-    Locked = false,
-})
-Window:SelectTab(2)
-
--- 注入器检测状态标签
-local InjectorStatusTag = Tabs.Settings:Tag({
-    Title = "未检测",
-    Color = Color3.fromHex("#00FF00")
-})
-
--- 注入器检测功能
-local function scanForInjectors()
-    local detectedInjectors = {}
+-- 注入器自动检测函数（在脚本开始时运行）
+local function autoDetectInjectors()
+    task.wait(1) -- 等待WindUI加载完成
     
     -- 检测各种注入器
-    local injectorList = {
-        {name = "Synapse X", var = syn, color = Color3.fromHex("#FF5555")},
-        {name = "Krnl", var = krnl, color = Color3.fromHex("#5599FF")},
-        {name = "Delta", var = delta, color = Color3.fromHex("#AA55FF")},
-        {name = "Script-Ware", var = sw, color = Color3.fromHex("#FFAA55")},
-        {name = "Fluxus", var = fluxus, color = Color3.fromHex("#55FF55")},
-        {name = "Comet", var = comet, color = Color3.fromHex("#FF55FF")},
-        {name = "Electron", var = electron, color = Color3.fromHex("#FFFF55")},
-        {name = "Arceus X", var = arceus, color = Color3.fromHex("#FF5555")}
+    local injectors = {
+        {"Synapse X", syn, "rbxassetid://18660563116", Color3.fromHex("#FF5555")},
+        {"Krnl", krnl, "rbxassetid://18660563117", Color3.fromHex("#5599FF")},
+        {"Delta", delta, "rbxassetid://18660563122", Color3.fromHex("#AA55FF")},
+        {"Script-Ware", sw, "rbxassetid://18660563118", Color3.fromHex("#FFAA55")},
+        {"Fluxus", fluxus, "rbxassetid://18660563119", Color3.fromHex("#55FF55")},
+        {"Comet", comet, "rbxassetid://18660563120", Color3.fromHex("#FF55FF")},
+        {"Electron", electron, "rbxassetid://18660563124", Color3.fromHex("#FFFF55")},
+        {"Arceus X", arceus, "rbxassetid://18660563126", Color3.fromHex("#FF5555")},
+        {"Hydrogen", hydrogen, "rbxassetid://18660563127", Color3.fromHex("#55AAFF")},
+        {"Oxygen U", oxygenu, "rbxassetid://18660563128", Color3.fromHex("#FF8855")}
     }
     
-    for _, injector in ipairs(injectorList) do
-        if injector.var then
-            table.insert(detectedInjectors, {name = injector.name, color = injector.color})
+    local detected = {}
+    
+    for _, data in ipairs(injectors) do
+        local name, check, image, color = unpack(data)
+        if check then
+            table.insert(detected, {name = name, image = image, color = color})
         end
     end
     
-    return detectedInjectors
-end
-
--- 注入器检测按钮
-Tabs.Settings:Button({
-    Title = "🔍 检测注入器",
-    Desc = "检测当前使用的脚本注入器",
-    Callback = function()
+    if #detected > 0 then
+        -- 延迟显示通知，确保UI完全加载
+        task.wait(0.5)
+        
+        -- 检测到注入器
+        local result = detected[1] -- 取第一个检测到的
+        
         WindUI:Notify({
-            Title = "检测中",
-            Content = "正在扫描注入器...",
-            Duration = 2
+            Title = "🔍 注入器自动检测",
+            Content = "检测到: " .. result.name,
+            Duration = 5,
+            Icon = result.image,
+            Color = result.color
         })
         
-        local detected = scanForInjectors()
-        
-        if #detected > 0 then
-            local mainInjector = detected[1]
-            InjectorStatusTag:SetTitle("检测到: " .. mainInjector.name)
-            InjectorStatusTag:SetColor(mainInjector.color)
-            
-            local injectorNames = ""
+        -- 可选：自动弹出详细结果
+        task.wait(2)
+        if #detected > 1 then
+            local details = "自动检测到 " .. #detected .. " 个注入器:\n\n"
             for i, inj in ipairs(detected) do
-                injectorNames = injectorNames .. "• " .. inj.name .. "\n"
+                details = details .. "✅ " .. inj.name .. "\n"
             end
+            details = details .. "\n主注入器: " .. result.name
             
             WindUI:Popup({
-                Title = "注入器检测结果",
-                Icon = "shield-alert",
-                IconThemed = true,
-                Content = "检测到以下注入器:\n\n" .. injectorNames .. "\n检测数量: " .. #detected,
+                Title = "自动检测结果",
+                Icon = result.image,
+                IconThemed = false,
+                Content = details,
                 Buttons = {
                     {
                         Title = "查看详情",
                         Icon = "eye",
                         Callback = function()
-                            local details = "注入器检测详情:\n\n"
-                            details = details .. (syn and "✅ Synapse X (高级注入器)\n" or "")
-                            details = details .. (krnl and "✅ Krnl (免费注入器)\n" or "")
-                            details = details .. (delta and "✅ Delta (iOS注入器)\n" or "")
-                            details = details .. (sw and "✅ Script-Ware (跨平台)\n" or "")
-                            details = details .. (fluxus and "✅ Fluxus (多平台)\n" or "")
-                            details = details .. (comet and "✅ Comet (免费)\n" or "")
-                            details = details .. (electron and "✅ Electron\n" or "")
-                            details = details .. (arceus and "✅ Arceus X (移动端)\n" or "")
-                            
-                            if details == "注入器检测详情:\n\n" then
-                                details = details .. "❌ 未检测到任何注入器"
+                            local fullDetails = "完整检测详情:\n\n"
+                            for i, inj in ipairs(detected) do
+                                fullDetails = fullDetails .. "• " .. inj.name .. "\n"
                             end
+                            fullDetails = fullDetails .. "\n注入器数量: " .. #detected
                             
                             WindUI:Popup({
                                 Title = "检测详情",
-                                Content = details,
+                                Content = fullDetails,
                                 Buttons = {
                                     {Title = "关闭", Icon = "x"}
                                 }
@@ -1026,22 +1007,137 @@ Tabs.Settings:Button({
                     }
                 }
             })
-            
-            WindUI:Notify({
-                Title = "检测完成",
-                Content = "发现 " .. #detected .. " 个注入器",
-                Duration = 4,
-                Icon = "alert-circle"
-            })
-        else
-            InjectorStatusTag:SetTitle("安全")
-            InjectorStatusTag:SetColor(Color3.fromHex("#00FF00"))
+        end
+        
+        return detected
+    else
+        -- 未检测到注入器
+        task.wait(0.5)
+        WindUI:Notify({
+            Title = "🔒 安全检测",
+            Content = "未检测到已知注入器",
+            Duration = 4,
+            Icon = "shield-check"
+        })
+        
+        return {}
+    end
+end
+
+-- 在脚本开始处启动自动检测
+local autoDetectionThread = task.spawn(function()
+    local detected = autoDetectInjectors()
+    
+    -- 记录检测结果，可在设置页面查看
+    _G.InjectorDetectionResult = {
+        time = os.date("%H:%M:%S"),
+        detected = detected,
+        count = #detected
+    }
+end)
+
+-- 创建 Tab
+local Tab = Window:Tab({
+    Title = "设置",
+    Icon = "settings",
+    Locked = false,
+})
+Window:SelectTab(2)
+
+-- 设置标签页内容
+Tab:Paragraph({
+    Title = "系统设置",
+    Desc = "脚本配置与安全检测",
+    Image = "",
+    ImageSize = 65,
+    Thumbnail = "",
+    ThumbnailSize = 180
+})
+
+-- 注入器检测按钮（手动检测）
+local 检测Button = Tab:Button({
+    Title = "手动检测注入器",
+    Desc = "手动运行注入器检测",
+    Locked = false,
+    Callback = function()
+        -- 检测各种注入器
+        local injectors = {
+            {"Synapse X", syn, "rbxassetid://18660563116", Color3.fromHex("#FF5555")},
+            {"Krnl", krnl, "rbxassetid://18660563117", Color3.fromHex("#5599FF")},
+            {"Delta", delta, "rbxassetid://18660563122", Color3.fromHex("#AA55FF")},
+            {"Script-Ware", sw, "rbxassetid://18660563118", Color3.fromHex("#FFAA55")},
+            {"Fluxus", fluxus, "rbxassetid://18660563119", Color3.fromHex("#55FF55")},
+            {"Comet", comet, "rbxassetid://18660563120", Color3.fromHex("#FF55FF")},
+            {"Electron", electron, "rbxassetid://18660563124", Color3.fromHex("#FFFF55")},
+            {"Arceus X", arceus, "rbxassetid://18660563126", Color3.fromHex("#FF5555")},
+            {"Hydrogen", hydrogen, "rbxassetid://18660563127", Color3.fromHex("#55AAFF")},
+            {"Oxygen U", oxygenu, "rbxassetid://18660563128", Color3.fromHex("#FF8855")}
+        }
+        
+        local detected = {}
+        
+        for _, data in ipairs(injectors) do
+            local name, check, image, color = unpack(data)
+            if check then
+                table.insert(detected, {name = name, image = image, color = color})
+            end
+        end
+        
+        if #detected > 0 then
+            -- 检测到注入器
+            local result = detected[1] -- 取第一个检测到的
             
             WindUI:Popup({
-                Title = "检测结果",
+                Title = "检测到注入器",
+                Icon = result.image,
+                IconThemed = false,
+                Content = "当前使用: " .. result.name .. 
+                         "\n\n检测时间: " .. os.date("%H:%M:%S") .. 
+                         "\n注入器数量: " .. #detected .. " 个",
+                Buttons = {
+                    {
+                        Title = "查看详情",
+                        Icon = "eye",
+                        Callback = function()
+                            local details = "检测详情:\n\n"
+                            for i, inj in ipairs(detected) do
+                                details = details .. "✅ " .. inj.name .. "\n"
+                            end
+                            details = details .. "\n总计: " .. #detected .. " 个注入器"
+                            
+                            WindUI:Popup({
+                                Title = "检测详情",
+                                Content = details,
+                                Buttons = {
+                                    {Title = "关闭", Icon = "x"}
+                                }
+                            })
+                        end
+                    },
+                    {
+                        Title = "确定",
+                        Icon = "check",
+                        Variant = "Primary",
+                        Callback = function()
+                            WindUI:Notify({
+                                Title = "检测完成",
+                                Content = result.name .. " 已被识别",
+                                Duration = 3,
+                                Icon = "shield",
+                                Color = result.color
+                            })
+                        end
+                    }
+                }
+            })
+        else
+            -- 未检测到注入器
+            WindUI:Popup({
+                Title = "未检测到注入器",
                 Icon = "shield-check",
                 IconThemed = true,
-                Content = "✅ 未检测到已知注入器\n\n系统状态: 安全",
+                Content = "安全检测通过\n\n检测时间: " .. os.date("%H:%M:%S") .. 
+                         "\n当前环境: 安全",
                 Buttons = {
                     {
                         Title = "确定",
@@ -1050,21 +1146,160 @@ Tabs.Settings:Button({
                     }
                 }
             })
+        end
+    end
+})
+
+-- 查看自动检测结果按钮
+Tab:Button({
+    Title = "查看自动检测结果",
+    Desc = "查看脚本启动时的检测结果",
+    Callback = function()
+        if _G.InjectorDetectionResult then
+            local result = _G.InjectorDetectionResult
+            local content = "自动检测结果:\n\n"
+            content = content .. "检测时间: " .. result.time .. "\n"
+            content = content .. "检测数量: " .. result.count .. " 个\n\n"
             
-            WindUI:Notify({
-                Title = "检测完成",
-                Content = "未检测到注入器",
-                Duration = 3,
-                Icon = "shield-check"
+            if result.count > 0 then
+                content = content .. "检测到的注入器:\n"
+                for i, inj in ipairs(result.detected) do
+                    content = content .. "• " .. inj.name .. "\n"
+                end
+                content = content .. "\n主注入器: " .. result.detected[1].name
+                
+                WindUI:Popup({
+                    Title = "自动检测记录",
+                    Icon = result.detected[1].image,
+                    IconThemed = false,
+                    Content = content,
+                    Buttons = {
+                        {
+                            Title = "重新检测",
+                            Icon = "refresh-cw",
+                            Callback = function()
+                                -- 取消之前的检测线程
+                                if autoDetectionThread then
+                                    task.cancel(autoDetectionThread)
+                                end
+                                
+                                -- 重新检测
+                                autoDetectionThread = task.spawn(function()
+                                    local newResult = autoDetectInjectors()
+                                    _G.InjectorDetectionResult = {
+                                        time = os.date("%H:%M:%S"),
+                                        detected = newResult,
+                                        count = #newResult
+                                    }
+                                end)
+                            end
+                        },
+                        {
+                            Title = "确定",
+                            Icon = "check",
+                            Variant = "Primary"
+                        }
+                    }
+                })
+            else
+                content = content .. "✅ 未检测到任何注入器\n\n系统状态: 安全"
+                
+                WindUI:Popup({
+                    Title = "自动检测记录",
+                    Icon = "shield-check",
+                    IconThemed = true,
+                    Content = content,
+                    Buttons = {
+                        {
+                            Title = "重新检测",
+                            Icon = "refresh-cw",
+                            Callback = function()
+                                local newResult = autoDetectInjectors()
+                                _G.InjectorDetectionResult = {
+                                    time = os.date("%H:%M:%S"),
+                                    detected = newResult,
+                                    count = #newResult
+                                }
+                            end
+                        },
+                        {
+                            Title = "确定",
+                            Icon = "check",
+                            Variant = "Primary"
+                        }
+                    }
+                })
+            end
+        else
+            WindUI:Popup({
+                Title = "检测记录",
+                Icon = "file-question",
+                IconThemed = true,
+                Content = "尚未运行自动检测\n\n点击下方按钮立即检测",
+                Buttons = {
+                    {
+                        Title = "立即检测",
+                        Icon = "play",
+                        Callback = function()
+                            autoDetectionThread = task.spawn(function()
+                                local result = autoDetectInjectors()
+                                _G.InjectorDetectionResult = {
+                                    time = os.date("%H:%M:%S"),
+                                    detected = result,
+                                    count = #result
+                                }
+                            end)
+                        end,
+                        Variant = "Primary"
+                    },
+                    {
+                        Title = "取消",
+                        Icon = "x",
+                        Variant = "Secondary"
+                    }
+                }
             })
         end
     end
 })
 
--- 增强检测
-Tabs.Settings:Button({
-    Title = "高级检测",
-    Desc = "执行更全面的安全扫描",
+-- 自动检测设置
+Tab:Toggle({
+    Title = "启用自动检测",
+    Desc = "脚本启动时自动检测注入器",
+    Default = true,
+    Callback = function(state)
+        if state then
+            WindUI:Notify({
+                Title = "设置已保存",
+                Content = "自动检测已启用",
+                Duration = 3
+            })
+            -- 如果之前没检测过，立即运行一次
+            if not _G.InjectorDetectionResult then
+                autoDetectionThread = task.spawn(function()
+                    local result = autoDetectInjectors()
+                    _G.InjectorDetectionResult = {
+                        time = os.date("%H:%M:%S"),
+                        detected = result,
+                        count = #result
+                    }
+                end)
+            end
+        else
+            WindUI:Notify({
+                Title = "设置已保存",
+                Content = "自动检测已禁用",
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- 高级检测按钮
+Tab:Button({
+    Title = "高级安全扫描",
+    Desc = "执行深度安全检测",
     Callback = function()
         WindUI:Notify({
             Title = "高级扫描",
@@ -1072,140 +1307,92 @@ Tabs.Settings:Button({
             Duration = 2
         })
         
-        -- 检测getgenv函数（常见注入器特征）
-        local hasGetgenv = pcall(function() return type(getgenv) == "function" end)
-        
-        -- 检测其他特征
-        local features = {
-            {"Hook Function", hookfunction},
-            {"Clone Function", clonefunction},
-            {"Get Caller", getcallingscript},
-            {"Get Scripts", getscripts},
-            {"Get Connections", getconnections}
-        }
+        task.wait(1)
         
         local detectedFeatures = {}
-        for _, feature in ipairs(features) do
-            local name, func = feature[1], feature[2]
-            if func and type(func) == "function" then
-                table.insert(detectedFeatures, name)
-            end
-        end
         
-        if hasGetgenv then
-            table.insert(detectedFeatures, "GetGenV")
+        -- 检测各种特征
+        if syn then table.insert(detectedFeatures, "✅ Synapse X") end
+        if krnl then table.insert(detectedFeatures, "✅ Krnl") end
+        if delta then table.insert(detectedFeatures, "✅ Delta") end
+        if sw then table.insert(detectedFeatures, "✅ Script-Ware") end
+        if fluxus then table.insert(detectedFeatures, "✅ Fluxus") end
+        if comet then table.insert(detectedFeatures, "✅ Comet") end
+        if electron then table.insert(detectedFeatures, "✅ Electron") end
+        if arceus then table.insert(detectedFeatures, "✅ Arceus X") end
+        
+        -- 检测高级特征
+        local advancedFeatures = {
+            {"Hook Function", hookfunction},
+            {"Clone Function", clonefunction},
+            {"Get Calling Script", getcallingscript},
+            {"Get Scripts", getscripts},
+            {"Get GenV", getgenv}
+        }
+        
+        for _, feature in ipairs(advancedFeatures) do
+            local name, check = feature[1], feature[2]
+            if check and type(check) == "function" then
+                table.insert(detectedFeatures, "🔧 " .. name)
+            end
         end
         
         if #detectedFeatures > 0 then
-            local featureList = ""
-            for i, feature in ipairs(detectedFeatures) do
-                featureList = featureList .. "• " .. feature .. "\n"
+            local resultText = "检测结果:\n\n"
+            for _, feature in ipairs(detectedFeatures) do
+                resultText = resultText .. feature .. "\n"
             end
+            resultText = resultText .. "\n总计: " .. #detectedFeatures .. " 个特征"
             
             WindUI:Popup({
                 Title = "高级检测结果",
-                Icon = "alert-triangle",
+                Icon = "shield-alert",
                 IconThemed = true,
-                Content = "发现以下高级特征:\n\n" .. featureList .. "\n特征数量: " .. #detectedFeatures,
+                Content = resultText,
+                Buttons = {
+                    {
+                        Title = "导出结果",
+                        Icon = "download",
+                        Callback = function()
+                            setclipboard(resultText)
+                            WindUI:Notify({
+                                Title = "已复制",
+                                Content = "检测结果已复制到剪贴板",
+                                Duration = 3
+                            })
+                        end
+                    },
+                    {
+                        Title = "关闭",
+                        Icon = "x",
+                        Variant = "Secondary"
+                    }
+                }
+            })
+        else
+            WindUI:Popup({
+                Title = "检测结果",
+                Icon = "shield-check",
+                IconThemed = true,
+                Content = "✅ 未检测到任何注入器特征\n\n系统状态: 非常安全",
                 Buttons = {
                     {Title = "确定", Icon = "check", Variant = "Primary"}
                 }
             })
-            
-            InjectorStatusTag:SetTitle("高级特征")
-            InjectorStatusTag:SetColor(Color3.fromHex("#FF9900"))
-        else
-            WindUI:Notify({
-                Title = "高级检测完成",
-                Content = "未发现高级注入特征",
-                Duration = 3,
-                Icon = "shield-check"
-            })
         end
     end
 })
 
--- 自动检测开关
-Tabs.Settings:Toggle({
-    Title = "启动时自动检测",
-    Desc = "脚本加载时自动运行注入器检测",
-    Default = false,
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                task.wait(3) -- 等待UI加载完成
-                local detected = scanForInjectors()
-                if #detected > 0 then
-                    InjectorStatusTag:SetTitle("自动检测到")
-                    InjectorStatusTag:SetColor(detected[1].color)
-                    WindUI:Notify({
-                        Title = "自动检测",
-                        Content = "发现注入器: " .. detected[1].name,
-                        Duration = 4
-                    })
-                end
-            end)
-        end
-    end
+-- UI设置部分
+Tab:Paragraph({
+    Title = "UI设置",
+    Desc = "调整界面外观",
+    Image = "",
+    ImageSize = 65
 })
 
--- 清空检测结果
-Tabs.Settings:Button({
-    Title = "清空检测结果",
-    Desc = "重置检测状态",
-    Callback = function()
-        InjectorStatusTag:SetTitle("未检测")
-        InjectorStatusTag:SetColor(Color3.fromHex("#00FF00"))
-        WindUI:Notify({
-            Title = "已重置",
-            Content = "检测结果已清空",
-            Duration = 2,
-            Icon = "refresh-cw"
-        })
-    end
-})
-
--- 检测记录
-Tabs.Settings:Button({
-    Title = "检测记录",
-    Desc = "查看历史检测结果",
-    Callback = function()
-        local history = {
-            "[" .. os.date("%H:%M") .. "] 注入器检测系统就绪",
-            "[" .. os.date("%H:%M") .. "] 等待用户操作",
-            "[" .. os.date("%H:%M") .. "] 点击查看详情"
-        }
-        
-        WindUI:Popup({
-            Title = "检测记录",
-            Icon = "file-text",
-            IconThemed = true,
-            Content = table.concat(history, "\n"),
-            Buttons = {
-                {
-                    Title = "添加记录",
-                    Icon = "plus",
-                    Callback = function()
-                        table.insert(history, "[" .. os.date("%H:%M") .. "] 手动添加记录")
-                        WindUI:Notify({
-                            Title = "记录更新",
-                            Content = "已添加新记录",
-                            Duration = 2
-                        })
-                    end
-                },
-                {
-                    Title = "关闭",
-                    Icon = "x",
-                    Variant = "Secondary"
-                }
-            }
-        })
-    end
-})
-
--- UI设置
-Tabs.Settings:Toggle({
+-- 透明背景切换
+Tab:Toggle({
     Title = "透明背景",
     Desc = "切换窗口透明度",
     Default = true,
@@ -1219,25 +1406,11 @@ Tabs.Settings:Toggle({
     end
 })
 
-Tabs.Settings:Toggle({
-    Title = "显示滚动条",
-    Desc = "切换滚动条显示",
-    Default = true,
-    Callback = function(state)
-        Window:SetScrollBarEnabled(state)
-        WindUI:Notify({
-            Title = "UI设置",
-            Content = state and "滚动条已启用" or "滚动条已禁用",
-            Duration = 2
-        })
-    end
-})
-
--- 主题设置
-local themes = {"Dark", "Light", "Blue", "Purple"}
-local themeDropdown = Tabs.Settings:Dropdown({
+-- 主题选择下拉菜单
+local themeOptions = {"Dark", "Light", "Blue", "Purple", "Red", "Green"}
+local themeDropdown = Tab:Dropdown({
     Title = "选择主题",
-    Values = themes,
+    Values = themeOptions,
     Default = "Dark"
 })
 
@@ -1249,3 +1422,130 @@ themeDropdown.Callback = function(value)
         Duration = 3
     })
 end
+
+-- 窗口大小调整
+Tab:Slider({
+    Title = "窗口宽度",
+    Desc = "调整窗口宽度",
+    Value = { Min = 300, Max = 800, Default = 460 },
+    Callback = function(val)
+        Window:SetSize(UDim2.fromOffset(val, 340))
+        WindUI:Notify({
+            Title = "窗口设置",
+            Content = "宽度已调整为: " .. val,
+            Duration = 2
+        })
+    end
+})
+
+Tab:Slider({
+    Title = "窗口高度",
+    Desc = "调整窗口高度",
+    Value = { Min = 200, Max = 600, Default = 340 },
+    Callback = function(val)
+        Window:SetSize(UDim2.fromOffset(460, val))
+        WindUI:Notify({
+            Title = "窗口设置",
+            Content = "高度已调整为: " .. val,
+            Duration = 2
+        })
+    end
+})
+
+-- 重置设置按钮
+Tab:Button({
+    Title = "重置所有设置",
+    Desc = "恢复默认设置",
+    Callback = function()
+        WindUI:Popup({
+            Title = "重置设置",
+            Icon = "alert-triangle",
+            IconThemed = true,
+            Content = "确定要重置所有设置吗？\n这将恢复所有默认值。",
+            Buttons = {
+                {
+                    Title = "确定重置",
+                    Icon = "check",
+                    Callback = function()
+                        Window:SetTransparent(true)
+                        Window:SetTheme("Dark")
+                        Window:SetSize(UDim2.fromOffset(460, 340))
+                        themeDropdown:SetValue("Dark")
+                        WindUI:Notify({
+                            Title = "设置已重置",
+                            Content = "所有设置已恢复默认值",
+                            Duration = 3,
+                            Icon = "refresh-cw"
+                        })
+                    end,
+                    Variant = "Destructive"
+                },
+                {
+                    Title = "取消",
+                    Icon = "x",
+                    Variant = "Secondary"
+                }
+            }
+        })
+    end
+})
+
+-- 快速检测按钮（便捷版）
+Tab:Button({
+    Title = "快速检测",
+    Desc = "快速扫描常见注入器",
+    Callback = function()
+        local quickCheck = {
+            {"Synapse X", syn},
+            {"Krnl", krnl},
+            {"Delta", delta},
+            {"Script-Ware", sw}
+        }
+        
+        local found = false
+        local result = ""
+        
+        for _, data in ipairs(quickCheck) do
+            local name, check = data[1], data[2]
+            if check then
+                found = true
+                result = result .. "✅ " .. name .. "\n"
+            end
+        end
+        
+        if found then
+            WindUI:Popup({
+                Title = "快速检测结果",
+                Icon = "zap",
+                IconThemed = true,
+                Content = "检测到以下注入器:\n\n" .. result,
+                Buttons = {
+                    {Title = "确定", Icon = "check", Variant = "Primary"}
+                }
+            })
+        else
+            WindUI:Notify({
+                Title = "快速检测",
+                Content = "未检测到常见注入器",
+                Duration = 3,
+                Icon = "check-circle"
+            })
+        end
+    end
+})
+
+-- 关于信息
+Tab:Paragraph({
+    Title = "关于 Sixte HUB",
+    Desc = "版本: 2.0\n作者: 16\n功能: 多功能脚本中心\n注入器检测: 自动+手动",
+    Image = "",
+    ImageSize = 65
+})
+
+-- 设置完成消息
+WindUI:Notify({
+    Title = "设置标签页已加载",
+    Content = "注入器自动检测已启动",
+    Duration = 3,
+    Icon = "settings"
+})
