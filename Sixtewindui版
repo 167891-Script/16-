@@ -97,7 +97,6 @@ local TimeTag = Window:Tag({
 -- 创建指定的大类（作为标签页）
 local Tabs = {
     Home = Window:Tab({ Title = "主页", Icon = "crown" }),
-    Misc = Window:Tab({ Title = "其他", Icon = "settings" }),
 }
 
 Window:SelectTab(1)
