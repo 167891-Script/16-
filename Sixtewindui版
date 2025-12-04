@@ -932,10 +932,11 @@ local Tab = Window:Tab({
 })
 Window:SelectTab(2)
 
--- 大型主检测按钮
-DetectorTab:Button({
-    Title = "⚡ 一键检测注入器",
-    Desc = "点击检测当前使用的脚本注入器类型\n支持所有注入器",
+-- doors xk 按钮
+local Button = Tab:Button({
+    Title = "检测注入器😡😱",
+    Desc = "点击运行检测注入器",
+    Locked = false,
     Callback = function()
         -- 检测各种注入器
         local injectors = {
@@ -998,5 +999,13 @@ DetectorTab:Button({
                 }
             })
         end
+    end
+      
+        WindUI:Notify({
+            Title = "Vgxmod 亡命速递",
+            Content = "加载成功",
+            Duration = 3,
+            Icon = "MousePointerClick",
+        })
     end
 })
