@@ -932,9 +932,6 @@ local Tab = Window:Tab({
 })
 Window:SelectTab(2)
 
--- 单按钮注入器检测
-local DetectorTab = Window:Tab({ Title = "注入器检测", Icon = "shield" })
-
 -- 大型主检测按钮
 DetectorTab:Button({
     Title = "⚡ 一键检测注入器",
