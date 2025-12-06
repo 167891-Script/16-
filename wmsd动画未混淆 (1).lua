@@ -153,14 +153,3 @@ end)
 if not success then
     warn("加载失败:", err)
 end
-                
-                gui:Destroy()
-                print("增强版加载界面演示完成")
-            end
-        end
-    end)
-end
-
--- 延迟启动以显示动画效果
-task.wait(0.5)
-simulateLoading()
